@@ -104,35 +104,44 @@ fn main() {
     // Mutable Borrowing
     // =====================================================
 
-    let mut s = String::from("Rust");
+    // let mut s = String::from("Rust");
 
-    let r1 = &mut s;
+    // let r1 = &mut s;
 
-    r1.push_str(" Programming");
+    // r1.push_str(" Programming");
 
-    println!("{r1}");
-    println!("{r1}");
+    // println!("{r1}");
+    // println!("{r1}");
 
-    println!("{s}");
-    println!("{s}");
+    // println!("{s}");
+    // println!("{s}");
 
-    // =====================================================
-    // Multiple Mutable Borrows (Non-overlapping)
-    // =====================================================
+    // // =====================================================
+    // // Multiple Mutable Borrows (Non-overlapping)
+    // // =====================================================
 
-    let mut s = String::from("Rust");
+    // let mut s = String::from("Rust");
 
-    let r1 = &mut s;
+    // let r1 = &mut s;
 
-    r1.push_str(" Programming");
+    // r1.push_str(" Programming");
 
-    println!("{r1}");
+    // println!("{r1}");
 
-    let r2 = &mut s;
+    // let r2 = &mut s;
 
-    r2.push_str(" is very good");
+    // r2.push_str(" is very good");
 
-    println!("{r2}");
+    // println!("{r2}");
+
+      let name = String::from("Rust");
+       let st = String::from("Programming");
+
+    let result = identity(&name,&st);
+
+    println!("{name}");
+    println!("{result}");
+
 }
 
 // =====================================================
@@ -149,4 +158,13 @@ fn main() {
 
 // fn print_name(name: &String) {
 //     println!("{name}");
+// }
+fn identity<'a>(s: &'a String,st: &'a String) -> &'a String {
+    st
+}
+
+
+
+// fn identity(s: &String) -> &String {
+//     s
 // }
