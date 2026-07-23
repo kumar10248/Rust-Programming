@@ -41,13 +41,13 @@ impl Student {
     fn search_student_byuid<'a>(
         students:&'a Vec<Student>,
         uid:&str,
-    )->Option<&'a Student>{
+    )->Result<&'a Student,String>{
  for student in students{
             if student.uid==uid{
-                return Some(student);
+                return Ok(student);
             }
         }
-        None
+        Err(String::from("Student Details not found"))
     }
 }
 
@@ -74,9 +74,37 @@ let stud3=Student{
     age:22,
     cgpa:8.0,
 };
+
+let stud4=Student{
+    name:String::from("Diya"),
+    uid:String::from("22BCS10472"),
+    age:22,
+    cgpa:7.6,
+};
+
+let stud5=Student{
+    name:String::from("Pradeep"),
+    uid:String::from("22BCS10284"),
+    age:22,
+    cgpa:8.7,
+};
+
+let stud6=Student{
+    name:String::from("Khushi"),
+    uid:String::from("22BCS10468"),
+    age:22,
+    cgpa:8.0,
+};
+
 students.push(stud1);
 students.push(stud2);
 students.push(stud3);
+students.push(stud4);
+students.push(stud5);
+students.push(stud6);
+
+
+
 
 for student in &mut students {
     student.change_cgpa();
@@ -87,7 +115,7 @@ for student in &mut students {
 // }
 
 let name=String::from("Saniya");
-let uid=String::from("22BCS10131");
+let uid=String::from("22BCS10472");
 let result1=Student::search_student(&students,&name);
 let result2=Student::search_student_byuid(&students,&uid);
 
@@ -103,12 +131,12 @@ match result1{
 
 
 match result2{
-    Some(student)=>{
+    Ok(student)=>{
         println!("Found!!!🥳🥳🥳 ");
         student.display();
     }
-    None =>{
-         println!("Student not found with UID {}",uid);
+    Err(err) =>{
+         println!("{}",err);
     }
 }
 
