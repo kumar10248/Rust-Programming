@@ -1,3 +1,10 @@
+use std::fmt;
+impl fmt::Display for Student {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ({})", self.name, self.age)
+    }
+}
+#[derive(Debug)]
 struct Student{
     name:String,
     uid:String,
@@ -96,6 +103,7 @@ let stud6=Student{
     cgpa:8.0,
 };
 
+println!("Student Details are: {}",stud1);
 students.push(stud1);
 students.push(stud2);
 students.push(stud3);
@@ -110,9 +118,9 @@ for student in &mut students {
     student.change_cgpa();
 }
 
-// for student in &students {
-//    student.display();
-// }
+for student in &students {
+   student.display();
+}
 
 let name=String::from("Saniya");
 let uid=String::from("22BCS10472");

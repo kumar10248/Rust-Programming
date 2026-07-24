@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+text_io = "0.1"
 
 [[bin]]
 name = "project"
@@ -16,3 +17,7 @@ path = "src/main.rs"
 [[bin]]
 name = "trait"
 path = "src/trait.rs"
+
+[[bin]]
+name = "add"
+path = "src/add.rs"
