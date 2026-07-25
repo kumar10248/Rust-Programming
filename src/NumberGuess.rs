@@ -7,7 +7,7 @@ fn generate_random_number() -> i32 {
 
 fn guess_number(){
     let num=generate_random_number();
-    println!("Random Number: {}", num);
+    // println!("Random Number: {}", num);
     let mut count=0;
     loop{
       let gn=add::read_int("Enter Guess Number");

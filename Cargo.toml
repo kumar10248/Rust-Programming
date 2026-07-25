@@ -26,3 +26,7 @@ path = "src/add.rs"
 [[bin]]
 name = "NumberGuess"
 path = "src/NumberGuess.rs"
+
+[[bin]]
+name = "StudentRecord"
+path = "src/StudentRecord.rs"
