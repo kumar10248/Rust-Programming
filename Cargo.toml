@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 text_io = "0.1"
+rand = "0.8.5"
 
 [[bin]]
 name = "project"
@@ -21,3 +22,7 @@ path = "src/trait.rs"
 [[bin]]
 name = "add"
 path = "src/add.rs"
+
+[[bin]]
+name = "NumberGuess"
+path = "src/NumberGuess.rs"
