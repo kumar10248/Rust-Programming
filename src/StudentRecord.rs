@@ -8,14 +8,11 @@ struct Student{
 }
 impl Student {
   
-    fn display(&self){
-       
-    println!("   {}       {}                       {} ",
-    self.roll_no,
-    self.name,
-    self.age, 
-);
-
+fn display(&self) {
+        println!("{:<20} {:<30} {:<3}", 
+            self.roll_no, 
+            self.name, 
+            self.age);
     }
 
 }
@@ -168,14 +165,14 @@ fn main(){
     match choice{
         1 => add_student(&mut students),
         2 => {
-            println!("-------------------------------------------------------------");
-            println!("   Roll No.           Name                               Age ");
+            println!("----------------------------------------------------------");
+            println!("Roll No.             Name                           Age ");
       
             for student in &students{
 
                 student.display();
             }
-            println!("-------------------------------------------------------------");
+            println!("----------------------------------------------------------");
 
         }
         3 => {
