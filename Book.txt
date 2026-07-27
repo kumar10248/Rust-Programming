@@ -1,7 +1,0 @@
-101,The Rust Programming Language,Steve Klabnik,2018,,Available
-102,Programming Rust,Jim Blandy,2017,,Available
-104,Mastering Rust,Jane Smith,2019,,Available
-105,Beginning Rust,Michael Johnson,2021,,Available
-106,Rust in Action,Tim McNamara,2021,,Available
-107,Hands-On Rust,Alex Crichton,2020,22BCS10248,Issued
-108,Rust Reference,Kumar Devashish,2026,,Available
