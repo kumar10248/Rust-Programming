@@ -30,3 +30,7 @@ path = "src/NumberGuess.rs"
 [[bin]]
 name = "StudentRecord"
 path = "src/StudentRecord.rs"
+
+[[bin]]
+name = "lms"
+path = "src/lms.rs"
