@@ -34,3 +34,7 @@ path = "src/StudentRecord.rs"
 [[bin]]
 name = "lms"
 path = "src/lms.rs"
+
+[[bin]]
+name = "bank"
+path = "src/banking_system.rs"
