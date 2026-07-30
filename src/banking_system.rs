@@ -2,6 +2,7 @@ use rand::Rng;
 mod add;
 use std::fs::File;
 use std::io::{BufRead, Write};
+use std::fmt;
 
 
 #[derive(Debug)]
@@ -98,6 +99,20 @@ struct Transaction{
 }
 
 
+impl fmt::Display for IdentityDocument {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            IdentityDocument::Aadhaar(id_val) =>write!(f, "Aadhaar:{}", id_val),
+            IdentityDocument::PAN(id_val) =>write!(f, "PAN:{}", id_val),
+           IdentityDocument::Passport(id_val) =>write!(f, "Passport:{}", id_val),
+           
+        }
+    }
+}
+
+
+
+
 impl Transaction {
     fn display(&self) {
         let to_account = self
@@ -108,7 +123,7 @@ impl Transaction {
         let amount_rupees = self.amount / 100;
 
         println!(
-            "{:<15} {:<12} {:<12} {:?} ₹{:<8} {:?} {:<25} {:?}",
+            "{:<20} {:<15} {:<15} {:?} ₹{:<10} {:?} {:<25} {:?}",
             self.transaction_id,
             self.from_account,
             to_account,
@@ -124,28 +139,27 @@ impl Transaction {
 
 impl Customer {
     fn display(&self) {
-                println!(
-            "{:<10} {:<30} {:<30} {:<12}   {:<50}   {:?} {:<10}", 
-            self.customer_id, 
-            self.name,
-            self.email, 
-            self.phone,
-           self.address,
-           self.government_id,
-          self.date_of_birth,
+        println!(
+            "{:<16} {:<22} {:<28} {:<15} {:<28} {:<25} {:<12}",
+            self.customer_id,     // 1. Matches "Customer ID"
+            self.name,            // 2. Matches "Name"
+            self.email,           // 3. Matches "Email ID"
+            self.phone,           // 4. Matches "Phone Number"
+            self.address,         // 5. Matches "Address"
+            self.government_id,   // 6. Matches "Government ID"
+            self.date_of_birth,   // 7. Matches "DOB"
         );
-
     }
 }
-
 
 impl Account {
     fn display(&self) {
         let balance_in_rupee = self.balance_in_paise / 100;
 
         println!(
-            "{:<10} {:<30} {:<15} {:?} ₹{} {:?}",
+            "{:<20} {:<20}{:<40} {:<20} {:?} ₹{:<10} {:?}",
             self.account_number,
+            self.branch.ifsc_code(),
             self.branch.name(),
             self.customer_id,
             self.account_type,
@@ -162,18 +176,190 @@ fn save_customers(customers: &[Customer]) -> std::io::Result<()> {
     for customer in customers {
         writeln!(
             file, 
-            "{},{},{},{},{},{:?},{}", 
+            "{}|{}|{}|{}|{}|{}|{}", 
             customer.customer_id, 
             customer.name,
             customer.email, 
             customer.phone,
            customer.address,
-           customer.government_id,
+           (customer.government_id),
           customer.date_of_birth,
         )?;
     }
 
     Ok(())
+}
+
+
+
+
+fn parse_identity_document(s: &str) -> IdentityDocument {
+    // Split by colon (e.g., "Aadhaar:1234-5678" -> ["Aadhaar", "1234-5678"])
+    let parts: Vec<&str> = s.splitn(2, ':').collect();
+    let doc_type = parts.first().copied().unwrap_or("");
+    let doc_num = parts.get(1).copied().unwrap_or("").to_string();
+
+    match doc_type {
+        "Aadhaar" => IdentityDocument::Aadhaar(doc_num),
+        "PAN" => IdentityDocument::PAN(doc_num),
+        "Passport" => IdentityDocument::Passport(doc_num),
+        _ => IdentityDocument::Aadhaar(s.to_string()), // Default fallback with raw string
+    }
+}
+
+
+fn load_customers()->std::io::Result<Vec<Customer>>{
+    let file = File::open("data/customers.txt")?;
+    let reader = std::io::BufReader::new(file);
+    let mut customers = Vec::new();
+
+    for line in reader.lines(){
+        let line =line?;
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len()==7{
+let customer_id=parts[0].trim().to_string();
+let name=parts[1].trim().to_string();
+let email=parts[2].trim().to_string();
+let phone=parts[3].trim().to_string();
+let address=parts[4].trim().to_string();
+let government_id = parse_identity_document(parts[5].trim());
+let dob=parts[6].trim().to_string();
+
+let customer = Customer {
+    name,
+    customer_id,
+    phone,
+    email,
+    government_id,
+    address,
+    date_of_birth: dob,
+};
+
+customers.push(customer);
+        }
+
+    }
+Ok(customers)
+
+}
+
+fn load_accounts()->std::io::Result<Vec<Account>>{
+    let file = File::open("data/accounts.txt")?;
+    let reader = std::io::BufReader::new(file);
+    let mut accounts = Vec::new();
+
+    for line in reader.lines(){
+        let line =line?;
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len()==7{
+
+            let account_number:u32=parts[0].trim().parse().unwrap_or(0);
+            let branch=match parts[1].trim(){
+             "Kharar"=>Branch::Kharar,
+             "ChandigarhUniversity"=>Branch::ChandigarhUniversity,
+             "ChandigarhSec17"=>Branch::ChandigarhSec17,
+             "ChandigarhSec43"=>Branch::ChandigarhSec43,
+             "ElanteMall"=>Branch::ElanteMall,
+             _=>Branch::ChandigarhUniversity,
+            };
+             let customer_id=parts[2].trim().to_string();
+                let account_type=match parts[3].trim(){
+                "Savings"=>AccountType::Savings,
+                "Current"=>AccountType::Current,
+                _=> AccountType::Savings,
+                };
+                let balance_in_paise:u64=parts[4].trim().parse().unwrap_or(0);
+                let pin=parts[5].trim().to_string();
+                let account_status=match parts[6].trim(){
+                "Active"=>AccountStatus::Active,
+                "Closed"=>AccountStatus::Closed,
+                _=>AccountStatus::Closed,
+
+               };
+
+               let account =Account{
+                account_number,
+                branch,
+                customer_id,
+                account_type,
+                balance_in_paise,
+                pin,
+                account_status,
+               };
+               accounts.push(account);
+               }
+
+
+};
+
+Ok(accounts)
+
+
+
+
+}
+
+
+fn load_transactions()->std::io::Result<Vec<Transaction>>{
+    let file = File::open("data/transactions.txt")?;
+    let reader = std::io::BufReader::new(file);
+    let mut transactions = Vec::new();
+
+    for line in reader.lines(){
+        let line =line?;
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len()==8{
+            let transaction_id:u64=parts[0].trim().parse().unwrap_or(0);
+            let from_account:u32=parts[1].trim().parse().unwrap_or(0);
+            let to_account=match parts[2].trim(){
+                "None" => None,
+                account => Some(account.parse::<u32>().unwrap_or(0)),
+            };
+
+
+        let transaction_type=match parts[3].trim(){
+             "Deposit"=> TransactionType::Deposit,
+             "TransferIn"=> TransactionType::TransferIn,
+             "TransferOut"=> TransactionType::TransferOut,
+             "Withdrawal"=> TransactionType::Withdrawal,
+             _=>TransactionType::Deposit,
+        };
+        let amount:u64=parts[4].trim().parse().unwrap_or(0);
+        let channel=match parts[5].trim(){
+        "Branch"=>TransactionChannel::Branch,
+        "UPI"=>TransactionChannel::UPI,
+        "NetBanking"=>TransactionChannel::NetBanking,
+        "MobileApp"=>TransactionChannel::MobileApp,
+        _=>TransactionChannel::Branch,
+
+
+        };
+        let date_time=parts[6].trim().to_string();
+        let status= match parts[7].trim(){
+        "Success"=>TransactionStatus::Success,
+        "Pending"=>TransactionStatus::Pending,
+        "Failed"=>TransactionStatus::Failed,
+        _ =>TransactionStatus::Failed,
+
+        };
+        
+            
+      let transaction=Transaction{
+        transaction_id,
+        from_account,
+        to_account,
+        transaction_type,
+        amount,
+        channel,
+        date_time,
+        status,
+      };
+      transactions.push(transaction);
+        }
+
+    }
+Ok(transactions)
+
 }
 
 
@@ -183,12 +369,13 @@ fn save_accounts(accounts: &[Account]) -> std::io::Result<()> {
     for account in accounts {
         writeln!(
             file, 
-            "{},{},{},{:?},{},{:?}",
+            "{}|{}|{}|{:?}|{}|{}|{:?}",
             account.account_number,
             account.branch.name(),
             account.customer_id,
             account.account_type,
             account.balance_in_paise,
+            account.pin,
             account.account_status,
         )?;
     }
@@ -208,7 +395,7 @@ fn save_transactions(transactions: &[Transaction]) -> std::io::Result<()> {
 
         writeln!(
             file, 
-           "{},{},{},{:?},{},{:?},{},{:?}",
+           "{}|{}|{}|{:?}|{}|{:?}|{}|{:?}",
             transaction.transaction_id,
             transaction.from_account,
             to_account,
@@ -246,7 +433,7 @@ fn generate_customer_id(customers:&[Customer])->String{
 }
 
 
-pub fn generate_account_no(accounts: &[Account]) -> u32 {
+ fn generate_account_no(accounts: &[Account]) -> u32 {
     loop {
         let candidate_no = generate_random_8digit();
         if !accounts.iter().any(|a| a.account_number == candidate_no) {
@@ -323,6 +510,7 @@ impl Account{
     account_type:AccountType,
     balance_in_paise: u64,
     pin:String,
+    account_status:AccountStatus
 
     )->Self{
         Account{
@@ -332,7 +520,7 @@ impl Account{
     account_type,
     balance_in_paise,
     pin,
-    account_status:AccountStatus::Active,
+    account_status,
         }
     }
 }
@@ -530,7 +718,7 @@ fn open_account(
             }
 
             let account_number = generate_account_no(accounts);
-
+let account_status=AccountStatus::Active;
             // 1. Create account with 0 initial balance
             let account = Account::new(
                 account_number,
@@ -539,6 +727,7 @@ fn open_account(
                 account_type,
                 0, // Starts at 0
                 pin.to_string(),
+                account_status,
             );
             accounts.push(account);
 
@@ -693,14 +882,41 @@ fn save_all_data(
     Ok(())
 }
 
+ fn load_all_data(
+    customers: &mut Vec<Customer>,
+    accounts: &mut Vec<Account>,
+    transactions: &mut Vec<Transaction>,
+) {
+    println!("Loading Customers Details from file...");
+
+    if let Ok(loaded_customers) = load_customers() {
+        *customers = loaded_customers; // Dereferenced here
+       println!("Customers Details loaded successfully.");
+    }
+    println!("Loading Accounts Details from file...");
+
+    if let Ok(loaded_accounts) = load_accounts() {
+        *accounts = loaded_accounts;   // Dereferenced here
+       println!("Accounts Details loaded successfully.");
+
+    }
+    println!("Loading Transactions Details from file...");
+
+    if let Ok(loaded_transactions) = load_transactions() {
+        *transactions = loaded_transactions; // Dereferenced here
+       println!("Transactions Details loaded successfully.");
+
+    }
+}
 
 //Main Function
 fn main(){
     println!("Welcome To RUST Banking System");
-
+     println!("");
     let mut customers=Vec::<Customer>::new();
     let mut accounts=Vec::<Account>::new();
     let mut transactions=Vec::<Transaction>::new();
+    load_all_data(&mut customers,&mut accounts, &mut transactions );
 
     loop{
         println!("1. Create Customer");
@@ -727,32 +943,32 @@ fn main(){
             }
 
             4=>{
-               println!("{}", "-".repeat(180));
-                println!("Customer ID        Name                         Email ID               Phone Number            Address         Government ID        DOB");
+               println!("{}", "-".repeat(150));
+                println!("Customer ID      Name                         Email ID               Phone Number       Address                   Government ID         DOB");
                 for customer in &customers{
                     customer.display();
                 }
-                println!("{}", "-".repeat(180));
+                println!("{}", "-".repeat(150));
 
             }
 
              5=>{
-                println!("{}", "-".repeat(180));
-                println!("Account Number      Branch Name                         Customer ID               Account Type            Balance         Account Status");
+                println!("{}", "-".repeat(140));
+                println!("Account Number         IFSC Code            Branch Name                             Customer ID        Type    Balance     Account Status");
                 for account in &accounts{
                     account.display();
                 }
-                println!("{}", "-".repeat(180));
+                println!("{}", "-".repeat(140));
 
             }
 
              6=>{
-               println!("{}", "-".repeat(200));
-                println!("Transaction ID            From Account               To Account              Transaction Type           Amount            Channel         Date & Time        status");
+               println!("{}", "-".repeat(130));
+                println!("Transaction ID   From Account     To Account          Type  Amount      Channel  Date & Time              status");
                 for transaction in &transactions{
                     transaction.display();
                 }
-                println!("{}", "-".repeat(200));
+                println!("{}", "-".repeat(130));
 
             }
            
