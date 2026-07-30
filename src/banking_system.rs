@@ -3,16 +3,21 @@ mod add;
 use std::fs::File;
 use std::io::{BufRead, Write};
 
+
 #[derive(Debug)]
 enum AccountType{
     Savings,
     Current,
 }
+
+
 #[derive(Debug)]
 enum AccountStatus{
     Active,
     Closed,
 }
+
+
 #[derive(Debug)]
 enum TransactionType{
     Deposit,
@@ -20,18 +25,23 @@ enum TransactionType{
     TransferOut,
     Withdrawal,
 }
+
+
 #[derive(Debug)]
 enum IdentityDocument {
     Aadhaar(String),
     PAN(String),
     Passport(String),
 }
+
+
 #[derive(Debug)]
 enum TransactionStatus{
 Success,
 Failed,
 Pending,
 }
+
 
 #[derive(Debug)]
 enum TransactionChannel {
@@ -42,6 +52,7 @@ enum TransactionChannel {
     MobileApp,
 }
 
+
 #[derive(Debug)]
 enum Branch {
     ChandigarhUniversity,
@@ -50,6 +61,7 @@ enum Branch {
     ChandigarhSec43,
     ElanteMall,
 }
+
 
 struct Account{
     account_number:u32,
@@ -60,6 +72,7 @@ struct Account{
     pin:String,
     account_status:AccountStatus,
 }
+
 
 struct Customer{
     name:String,
@@ -84,6 +97,7 @@ struct Transaction{
 
 }
 
+
 impl Transaction {
     fn display(&self) {
         let to_account = self
@@ -107,6 +121,7 @@ impl Transaction {
     }
 }
 
+
 impl Customer {
     fn display(&self) {
                 println!(
@@ -122,6 +137,7 @@ impl Customer {
 
     }
 }
+
 
 impl Account {
     fn display(&self) {
@@ -160,6 +176,7 @@ fn save_customers(customers: &[Customer]) -> std::io::Result<()> {
     Ok(())
 }
 
+
 fn save_accounts(accounts: &[Account]) -> std::io::Result<()> {
     let mut file = File::create("data/accounts.txt")?;
 
@@ -178,6 +195,7 @@ fn save_accounts(accounts: &[Account]) -> std::io::Result<()> {
 
     Ok(())
 }
+
 
 fn save_transactions(transactions: &[Transaction]) -> std::io::Result<()> {
     let mut file = File::create("data/transactions.txt")?;
@@ -212,6 +230,7 @@ fn generate_random_8digit() -> u32 {
     rng.gen_range(10_000_000..=99_999_999)
 }
 
+
 fn generate_customer_id(customers:&[Customer])->String{
  loop {
         let rn = generate_random_8digit();
@@ -226,6 +245,7 @@ fn generate_customer_id(customers:&[Customer])->String{
     }
 }
 
+
 pub fn generate_account_no(accounts: &[Account]) -> u32 {
     loop {
         let candidate_no = generate_random_8digit();
@@ -234,6 +254,7 @@ pub fn generate_account_no(accounts: &[Account]) -> u32 {
         }
     }
 }
+
 
 fn generate_transaction_id(transactions: &[Transaction]) -> u64 {
     let mut rng = rand::thread_rng();
@@ -244,6 +265,7 @@ fn generate_transaction_id(transactions: &[Transaction]) -> u64 {
         }
     }
 }
+
 
 impl Branch {
     fn ifsc_code(&self) -> &'static str {
@@ -256,6 +278,7 @@ impl Branch {
         }
     }
 
+
     fn name(&self) -> &'static str {
         match self {
             Branch::ChandigarhUniversity => "Chandigarh University",
@@ -266,6 +289,7 @@ impl Branch {
         }
     }
 }
+
 
 impl Customer{
     
@@ -290,6 +314,7 @@ impl Customer{
     }
 }
 
+
 impl Account{
     pub fn new(
     account_number:u32,
@@ -312,6 +337,7 @@ impl Account{
     }
 }
 
+
 fn get_customer_index(customers:&[Customer], customer_id: &str)->Option<usize>{
     for (index, customer) in customers.iter().enumerate() {
         if customer.customer_id == customer_id {
@@ -320,7 +346,6 @@ fn get_customer_index(customers:&[Customer], customer_id: &str)->Option<usize>{
     }
     None
 }
-
 
 
 fn read_identity_document()->IdentityDocument{
@@ -336,23 +361,23 @@ loop{
            let number= add::read_string("Enter Aadhaar Number");
             break IdentityDocument::Aadhaar(number);
         }
+
         2=>{
            let number= add::read_string("Enter PAN Number");
             break IdentityDocument::PAN(number);
         }
+
         3=>{
            let number= add::read_string("Enter Passport Number");
             break IdentityDocument::Passport(number);
         }
+
         _=> println!("Please Enter Valid Choice"),
     }
 
 }
 
-
 }
-
-
 
 
 fn read_account_type()->AccountType{
@@ -363,20 +388,16 @@ println!("2. Current Account.");
 loop{
     let choice=add::read_int("Enter your choice");
     match choice{
-        1=>{
-           
-            break AccountType::Savings;
-        }
-        2=>{
-            break AccountType::Current;
-        }
+        1=>break AccountType::Savings,
+
+        2=> break AccountType::Current,
        
         _=> println!("Please Enter Valid Choice"),
     }
-
 }
 
 }
+
 
 fn read_branch()->Branch{
 println!("Select your Branch");
@@ -399,8 +420,6 @@ loop{
         4=> break Branch::ChandigarhSec43,
 
         5=> break Branch::ElanteMall,
-
-        
        
         _=> println!("Please Enter Valid Choice"),
     }
@@ -408,6 +427,7 @@ loop{
 }
 
 }
+
 
 fn read_transaction_type()->TransactionType{
 println!("Select Transaction Type");
@@ -428,14 +448,13 @@ loop{
 
         4=> break TransactionType::TransferIn,
 
-        
-       
         _=> println!("Please Enter Valid Choice"),
     }
 
 }
 
 }
+
 
 fn read_transaction_channel()->TransactionChannel{
 println!("Select the Transaction Option");
@@ -458,15 +477,14 @@ loop{
         4=> break TransactionChannel::Branch,
 
         5=> break TransactionChannel::MobileApp,
-
         
-       
         _=> println!("Please Enter Valid Choice"),
     }
 
 }
 
 }
+
 
 fn open_customer(customers:&mut Vec<Customer> ){
 let customer_id=generate_customer_id(customers);
@@ -486,13 +504,11 @@ let customer=Customer::new(
     address,
     date_of_birth,
 );
-println!("================================");
-println!("Customer Created Successfully!");
-println!("Customer ID: {}", customer.customer_id);
-println!("================================");
+
 customers.push(customer);
 
 }
+
 
 fn open_account(
     customers: &[Customer],
@@ -610,6 +626,7 @@ fn open_account(
     Ok(())
 }
 
+
  fn perform_transaction(
     accounts: &mut Vec<Account>,
     transactions: &mut Vec<Transaction>,
@@ -654,6 +671,7 @@ fn open_account(
     Ok(())
 }
 
+
 // Helper function to handle saving everything
 fn save_all_data(
     customers: &[Customer],
@@ -675,6 +693,7 @@ fn save_all_data(
     Ok(())
 }
 
+
 //Main Function
 fn main(){
     println!("Welcome To RUST Banking System");
@@ -682,7 +701,6 @@ fn main(){
     let mut customers=Vec::<Customer>::new();
     let mut accounts=Vec::<Account>::new();
     let mut transactions=Vec::<Transaction>::new();
-
 
     loop{
         println!("1. Create Customer");
@@ -707,7 +725,8 @@ fn main(){
                    Err(err)=>println!("{err}"),
                 }
             }
-           4=>{
+
+            4=>{
                println!("{}", "-".repeat(180));
                 println!("Customer ID        Name                         Email ID               Phone Number            Address         Government ID        DOB");
                 for customer in &customers{
@@ -737,14 +756,14 @@ fn main(){
 
             }
            
-
-                        9 => {
+             9 => {
                 if let Err(err) = save_all_data(&customers, &accounts, &transactions) {
                     println!("Error while saving system data: {}", err);
                 }
                 println!("Exiting the program. Goodbye!");
                 break;
             }
+            
             _ => println!("Please Enter Valid Choice"),
             
         }
