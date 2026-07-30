@@ -1,35 +1,39 @@
 use rand::Rng;
 mod add;
+use std::fs::File;
+use std::io::{BufRead, Write};
 
+#[derive(Debug)]
 enum AccountType{
     Savings,
     Current,
 }
-
+#[derive(Debug)]
 enum AccountStatus{
     Active,
     Closed,
 }
-
+#[derive(Debug)]
 enum TransactionType{
     Deposit,
     TransferIn,
     TransferOut,
     Withdrawal,
 }
-
+#[derive(Debug)]
 enum IdentityDocument {
     Aadhaar(String),
     PAN(String),
     Passport(String),
 }
-
+#[derive(Debug)]
 enum TransactionStatus{
 Success,
 Failed,
 Pending,
 }
 
+#[derive(Debug)]
 enum TransactionChannel {
     ATM,
     UPI,
@@ -37,6 +41,8 @@ enum TransactionChannel {
     Branch,
     MobileApp,
 }
+
+#[derive(Debug)]
 enum Branch {
     ChandigarhUniversity,
     Kharar,
@@ -55,6 +61,16 @@ struct Account{
     account_status:AccountStatus,
 }
 
+struct Customer{
+    name:String,
+    customer_id:String,
+    phone:String,
+    email:String,
+    government_id:IdentityDocument,
+    address:String,
+    date_of_birth:String,
+}
+
 
 struct Transaction{
     transaction_id:u64,
@@ -67,15 +83,128 @@ struct Transaction{
     status:TransactionStatus,
 
 }
-struct Customer{
-    name:String,
-    customer_id:String,
-    phone:String,
-    email:String,
-    government_id:IdentityDocument,
-    address:String,
-    date_of_birth:String,
+
+impl Transaction {
+    fn display(&self) {
+        let to_account = self
+            .to_account
+            .map(|acc| acc.to_string())
+            .unwrap_or("None".to_string());
+
+        let amount_rupees = self.amount / 100;
+
+        println!(
+            "{:<15} {:<12} {:<12} {:?} ₹{:<8} {:?} {:<25} {:?}",
+            self.transaction_id,
+            self.from_account,
+            to_account,
+            self.transaction_type,
+            amount_rupees,
+            self.channel,
+            self.date_time,
+            self.status,
+        );
+    }
 }
+
+impl Customer {
+    fn display(&self) {
+                println!(
+            "{:<10} {:<30} {:<30} {:<12}   {:<50}   {:?} {:<10}", 
+            self.customer_id, 
+            self.name,
+            self.email, 
+            self.phone,
+           self.address,
+           self.government_id,
+          self.date_of_birth,
+        );
+
+    }
+}
+
+impl Account {
+    fn display(&self) {
+        let balance_in_rupee = self.balance_in_paise / 100;
+
+        println!(
+            "{:<10} {:<30} {:<15} {:?} ₹{} {:?}",
+            self.account_number,
+            self.branch.name(),
+            self.customer_id,
+            self.account_type,
+            balance_in_rupee,
+            self.account_status,
+        );
+    }
+}
+
+
+fn save_customers(customers: &[Customer]) -> std::io::Result<()> {
+    let mut file = File::create("data/customers.txt")?;
+
+    for customer in customers {
+        writeln!(
+            file, 
+            "{},{},{},{},{},{:?},{}", 
+            customer.customer_id, 
+            customer.name,
+            customer.email, 
+            customer.phone,
+           customer.address,
+           customer.government_id,
+          customer.date_of_birth,
+        )?;
+    }
+
+    Ok(())
+}
+
+fn save_accounts(accounts: &[Account]) -> std::io::Result<()> {
+    let mut file = File::create("data/accounts.txt")?;
+
+    for account in accounts {
+        writeln!(
+            file, 
+            "{},{},{},{:?},{},{:?}",
+            account.account_number,
+            account.branch.name(),
+            account.customer_id,
+            account.account_type,
+            account.balance_in_paise,
+            account.account_status,
+        )?;
+    }
+
+    Ok(())
+}
+
+fn save_transactions(transactions: &[Transaction]) -> std::io::Result<()> {
+    let mut file = File::create("data/transactions.txt")?;
+
+    for transaction in transactions {
+        let to_account = transaction
+            .to_account
+            .map(|acc| acc.to_string())
+            .unwrap_or("None".to_string());
+
+        writeln!(
+            file, 
+           "{},{},{},{:?},{},{:?},{},{:?}",
+            transaction.transaction_id,
+            transaction.from_account,
+            to_account,
+            transaction.transaction_type,
+            transaction.amount,
+            transaction.channel,
+            transaction.date_time,
+            transaction.status,
+        )?;
+    }
+
+    Ok(())
+}
+
 
 //it can be use for both cutomer ID and Account number generation
 fn generate_random_8digit() -> u32 {
@@ -420,7 +549,7 @@ fn open_account(
 }
 
 
-pub fn execute_transaction(
+ fn execute_transaction(
     accounts: &mut Vec<Account>,
     transactions: &mut Vec<Transaction>,
     from_acc_no: u32,
@@ -481,7 +610,7 @@ pub fn execute_transaction(
     Ok(())
 }
 
-pub fn perform_transaction(
+ fn perform_transaction(
     accounts: &mut Vec<Account>,
     transactions: &mut Vec<Transaction>,
 ) -> Result<(), String> {
@@ -525,6 +654,26 @@ pub fn perform_transaction(
     Ok(())
 }
 
+// Helper function to handle saving everything
+fn save_all_data(
+    customers: &[Customer],
+    accounts: &[Account],
+    transactions: &[Transaction],
+) -> Result<(), std::io::Error> {
+    println!("Saving Customers Details to file...");
+    save_customers(customers)?;
+    println!("Customers Details saved successfully.");
+
+    println!("Saving Accounts Details to file...");
+    save_accounts(accounts)?;
+    println!("Accounts Details saved successfully.");
+
+    println!("Saving Transactions Details to file...");
+    save_transactions(transactions)?;
+    println!("Transactions Details saved successfully.");
+
+    Ok(())
+}
 
 //Main Function
 fn main(){
@@ -539,6 +688,9 @@ fn main(){
         println!("1. Create Customer");
         println!("2. Open Account");
         println!("3. Make Transaction");
+        println!("4. View Customer");
+        println!("5. View Customer Account Details");
+        println!("6. View Transactions Details");
         println!("9. Exit");
 
         let choice=add::read_int("Enter your choice");
@@ -555,9 +707,44 @@ fn main(){
                    Err(err)=>println!("{err}"),
                 }
             }
+           4=>{
+               println!("{}", "-".repeat(180));
+                println!("Customer ID        Name                         Email ID               Phone Number            Address         Government ID        DOB");
+                for customer in &customers{
+                    customer.display();
+                }
+                println!("{}", "-".repeat(180));
 
+            }
 
-            9=> break,
+             5=>{
+                println!("{}", "-".repeat(180));
+                println!("Account Number      Branch Name                         Customer ID               Account Type            Balance         Account Status");
+                for account in &accounts{
+                    account.display();
+                }
+                println!("{}", "-".repeat(180));
+
+            }
+
+             6=>{
+               println!("{}", "-".repeat(200));
+                println!("Transaction ID            From Account               To Account              Transaction Type           Amount            Channel         Date & Time        status");
+                for transaction in &transactions{
+                    transaction.display();
+                }
+                println!("{}", "-".repeat(200));
+
+            }
+           
+
+                        9 => {
+                if let Err(err) = save_all_data(&customers, &accounts, &transactions) {
+                    println!("Error while saving system data: {}", err);
+                }
+                println!("Exiting the program. Goodbye!");
+                break;
+            }
             _ => println!("Please Enter Valid Choice"),
             
         }
