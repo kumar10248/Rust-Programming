@@ -44,7 +44,7 @@ Pending,
 }
 
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 enum TransactionChannel {
     ATM,
     UPI,
@@ -623,7 +623,6 @@ println!("Select Transaction Type");
 println!("1. Deposit");
 println!("2. Withdrawal");
 println!("3. TransferOut");
-println!("4. TransferIn");
 
 loop{
     let choice=add::read_int("Enter your choice");
@@ -634,7 +633,6 @@ loop{
 
         3=> break TransactionType::TransferOut,
 
-        4=> break TransactionType::TransferIn,
 
         _=> println!("Please Enter Valid Choice"),
     }
@@ -793,6 +791,35 @@ let account_status=AccountStatus::Active;
 
             accounts[from_index].balance_in_paise -= amount_in_paise;
             accounts[to_index].balance_in_paise += amount_in_paise;
+
+
+
+             let tx_out = Transaction {
+        transaction_id: generate_transaction_id(transactions),
+        from_account: from_acc_no,
+        to_account: to_acc_no,
+        transaction_type: TransactionType::TransferOut,
+        amount: amount_in_paise,
+       channel: channel.clone(),
+        date_time: "2026-07-29 10:00:00".to_string(),
+        status: TransactionStatus::Success,
+    };
+
+    transactions.push(tx_out);
+
+    let tx_in = Transaction {
+        transaction_id: generate_transaction_id(transactions),
+        from_account: from_acc_no,
+        to_account: to_acc_no,
+        transaction_type: TransactionType::TransferIn,
+        amount: amount_in_paise,
+        channel,
+        date_time: "2026-07-29 10:03:00".to_string(),
+        status: TransactionStatus::Success,
+    };
+    transactions.push(tx_in);
+    return  Ok(());
+
         }
         TransactionType::TransferIn => {
             return Err(String::from("TransferIn cannot be initiated directly."));
@@ -800,7 +827,7 @@ let account_status=AccountStatus::Active;
     }
 
     // 3. Record transaction in ledger
-    let tx = Transaction {
+        let tx = Transaction {
         transaction_id: generate_transaction_id(transactions),
         from_account: from_acc_no,
         to_account: to_acc_no,
@@ -810,8 +837,8 @@ let account_status=AccountStatus::Active;
         date_time: "2026-07-29 10:00:00".to_string(),
         status: TransactionStatus::Success,
     };
-
     transactions.push(tx);
+
     Ok(())
 }
 
