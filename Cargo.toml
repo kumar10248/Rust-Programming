@@ -28,8 +28,8 @@ name = "NumberGuess"
 path = "src/NumberGuess.rs"
 
 [[bin]]
-name = "StudentRecord"
-path = "src/StudentRecord.rs"
+name = "student"
+path = "src/student_record.rs"
 
 [[bin]]
 name = "lms"

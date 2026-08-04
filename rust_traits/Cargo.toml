@@ -1,0 +1,19 @@
+[package]
+name = "rust_traits"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[[bin]]
+name = "rust_traits"
+path = "src/main.rs"
+
+[[bin]]
+name = "main2"
+path = "src/trait_bounds.rs"
+
+[[bin]]
+name = "box"
+path = "src/box.rs"
+

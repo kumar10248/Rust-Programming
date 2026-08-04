@@ -27,7 +27,9 @@ fn area(&self)->f64{
 }
 }
 impl Shape for Circle{
-
+fn describe(&self){
+        println!("I am a Circle");
+    }
     fn area(&self)->f64{
         
         PI*self.r*self.r
@@ -36,20 +38,30 @@ impl Shape for Circle{
 
 
 
-fn print_area<T: Shape>(shape: &T) {
+// fn print_area<T: Shape>(shape: &T) {
 
-shape.describe();
-println!("Area is: {}",shape.area());
-}   
+// shape.describe();
+// println!("Area is: {:}",shape.area());
+// }   
 
 fn main(){
-    let rect=Rectangle{
+    let shapes:Vec<Box<dyn Shape>>=vec![
+    Box::new(Rectangle{
         l:10.0,
         b:20.0,
-    };
-   let circ=Circle{
+    }),
+   Box::new(Circle{
     r:10.0,
-   };
-    print_area(&rect);
-    print_area(&circ);
+   }),
+       Box::new(Rectangle{
+        l:4.0,
+        b:5.0,
+    }),
+
+    ];
+for sh in &shapes{
+   sh.describe();
+    
+    println!("Area: {:.2}",sh.area());
+};
 }
