@@ -17,3 +17,10 @@ path = "src/trait_bounds.rs"
 name = "box"
 path = "src/box.rs"
 
+[[bin]]
+name = "closure"
+path = "src/closure.rs"
+
+[[bin]]
+name = "iter"
+path = "src/iterator.rs"
